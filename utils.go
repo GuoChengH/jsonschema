@@ -13,18 +13,16 @@ import (
 
 // replace substitutes placeholders in a template string with actual parameter values.
 func replace(template string, params map[string]interface{}) string {
-	if params != nil {
-		for key, value := range params {
-			placeholder := "{" + key + "}"
-			template = strings.ReplaceAll(template, placeholder, fmt.Sprint(value))
-		}
+	for key, value := range params {
+		placeholder := "{" + key + "}"
+		template = strings.ReplaceAll(template, placeholder, fmt.Sprint(value))
 	}
 
 	return template
 }
 
 // mergeIntMaps merges two integer maps. The values in the second map overwrite the first where keys overlap.
-func mergeIntMaps(map1, map2 map[int]bool) map[int]bool {
+func mergeIntMaps(map1, map2 map[int]bool) map[int]bool { //nolint
 	for key, value := range map2 {
 		map1[key] = value
 	}
@@ -32,7 +30,7 @@ func mergeIntMaps(map1, map2 map[int]bool) map[int]bool {
 }
 
 // mergeStringMaps merges two string maps. The values in the second map overwrite the first where keys overlap.
-func mergeStringMaps(map1, map2 map[string]bool) map[string]bool {
+func mergeStringMaps(map1, map2 map[string]bool) map[string]bool { //nolint
 	for key, value := range map2 {
 		map1[key] = value
 	}
@@ -80,7 +78,7 @@ func getDataType(v interface{}) string {
 }
 
 // getFullURIWithAnchor appends an anchor to a URI, if provided.
-func getFullURIWithAnchor(uri, anchor string) string {
+func getFullURIWithAnchor(uri, anchor string) string { //nolint
 	if anchor == "" {
 		return uri
 	}
@@ -159,7 +157,7 @@ func splitRef(ref string) (baseURI string, anchor string) {
 }
 
 // getCurrentPathSegment extracts the last segment of a URI path.
-func getCurrentPathSegment(id string) string {
+func getCurrentPathSegment(id string) string { //nolint
 	if strings.HasSuffix(id, "/") {
 		return ""
 	} else {

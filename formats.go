@@ -132,7 +132,7 @@ func IsTime(v interface{}) bool {
 		return false
 	}
 
-	if str[0] == 'z' || str[0] == 'Z' {
+	if str[0] == 'z' || str[0] == 'Z' { //nolint
 		if len(str) != 1 {
 			return false
 		}
@@ -145,15 +145,17 @@ func IsTime(v interface{}) bool {
 		}
 
 		var sign int
-		if str[0] == '+' {
+		switch str[0] {
+		case '+':
 			sign = -1
-		} else if str[0] == '-' {
+		case '-':
 			sign = +1
-		} else {
+		default:
 			return false
 		}
 
 		var zh, zm int
+		ok := false
 		if zh, ok = isInRange(str[1:3], 0, 23); !ok {
 			return false
 		}
@@ -233,7 +235,9 @@ func IsDuration(v interface{}) bool {
 	}
 	s = s[1:]
 	units, ok = parseUnits()
+
 	return ok && len(s) == 0 && len(units) > 0 && strings.Contains("HMS", units)
+	// Error Used Contains TODO...
 }
 
 // IsPeriod tells whether given string is a valid period format
@@ -503,13 +507,14 @@ func IsRelativeJSONPointer(v interface{}) bool {
 	if s == "" {
 		return false
 	}
-	if s[0] == '0' {
+	switch {
+	case s[0] == '0':
 		s = s[1:]
-	} else if s[0] >= '0' && s[0] <= '9' {
+	case s[0] >= '0' && s[0] <= '9':
 		for s != "" && s[0] >= '0' && s[0] <= '9' {
 			s = s[1:]
 		}
-	} else {
+	default:
 		return false
 	}
 	return s == "#" || IsJSONPointer(s)

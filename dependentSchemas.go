@@ -27,15 +27,16 @@ func evaluateDependentSchemas(schema *Schema, instance interface{}, evaluatedPro
 	results := []*EvaluationResult{}
 
 	for propName, depSchema := range schema.DependentSchemas {
-		if _, exists := object[propName]; exists {
-			if depSchema != nil {
-				result, schemaEvaluatedProps, schemaEvaluatedItems := depSchema.evaluate(object, dynamicScope)
-				if result != nil {
-					result.SetEvaluationPath(fmt.Sprintf("/dependentSchemas/%s", propName)).
-						SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/dependentSchemas/%s", propName))).
-						SetInstanceLocation(fmt.Sprintf("/%s", propName))
-				}
-
+		_, exists := object[propName]
+		if !exists {
+			continue
+		}
+		if depSchema != nil {
+			result, schemaEvaluatedProps, schemaEvaluatedItems := depSchema.evaluate(object, dynamicScope)
+			if result != nil {
+				result.SetEvaluationPath(fmt.Sprintf("/dependentSchemas/%s", propName)).
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/dependentSchemas/%s", propName))).
+					SetInstanceLocation(fmt.Sprintf("/%s", propName))
 				if result.IsValid() {
 					// Merge maps only if dependent schema validation is successful
 					mergeStringMaps(evaluatedProps, schemaEvaluatedProps)

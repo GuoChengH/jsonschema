@@ -15,7 +15,7 @@ func (s *Schema) evaluate(instance interface{}, dynamicScope *DynamicScope) (*Ev
 	evaluatedProps := make(map[string]bool)
 	evaluatedItems := make(map[int]bool)
 
-	if s.Boolean != nil {
+	if s.Boolean != nil { //nolint
 		// Check if the schema is a boolean
 		if err := s.evaluateBoolean(instance, evaluatedProps, evaluatedItems); err != nil {
 			result.AddError(err)

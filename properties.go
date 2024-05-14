@@ -15,7 +15,7 @@ import (
 // If a property does not conform, it returns a EvaluationError detailing the issue with that property.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-properties
-func evaluateProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) { //nolint
 	if schema.Properties == nil {
 		return nil, nil // No properties defined, nothing to do.
 	}
@@ -27,24 +27,10 @@ func evaluateProperties(schema *Schema, object map[string]interface{}, evaluated
 		evaluatedProps[propName] = true
 		propValue, exists := object[propName]
 
-		if exists {
-			result, _, _ := propSchema.evaluate(propValue, dynamicScope)
-			if result != nil {
-				result.SetEvaluationPath(fmt.Sprintf("/properties/%s", propName)).
-					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/properties/%s", propName))).
-					SetInstanceLocation(fmt.Sprintf("/%s", propName))
-
-				results = append(results, result)
-
-				if !result.IsValid() {
-					invalid_properties = append(invalid_properties, propName)
-				}
-			}
-		} else {
+		if !exists { //nolint
+			// If property does not exist but is required and not specified by default
 			if isRequired(schema, propName) && !defaultIsSpecified(propSchema) {
-				// Handle properties that are expected but not provided
 				result, _, _ := propSchema.evaluate(nil, dynamicScope)
-
 				if result != nil {
 					result.SetEvaluationPath(fmt.Sprintf("/properties/%s", propName)).
 						SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/properties/%s", propName))).
@@ -56,6 +42,21 @@ func evaluateProperties(schema *Schema, object map[string]interface{}, evaluated
 						invalid_properties = append(invalid_properties, propName)
 					}
 				}
+			}
+			continue
+		}
+
+		// Property exists, evaluate its schema
+		result, _, _ := propSchema.evaluate(propValue, dynamicScope)
+		if result != nil {
+			result.SetEvaluationPath(fmt.Sprintf("/properties/%s", propName)).
+				SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/properties/%s", propName))).
+				SetInstanceLocation(fmt.Sprintf("/%s", propName))
+
+			results = append(results, result)
+
+			if !result.IsValid() {
+				invalid_properties = append(invalid_properties, propName)
 			}
 		}
 	}

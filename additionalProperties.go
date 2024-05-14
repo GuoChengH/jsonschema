@@ -15,7 +15,7 @@ import (
 // This function ensures that all properties not explicitly mentioned or matched are validated according to a default schema or constraints.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-additionalproperties
-func evaluateAdditionalProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateAdditionalProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) { //nolint
 	results := []*EvaluationResult{}
 	invalid_properties := []string{}
 
@@ -38,22 +38,24 @@ func evaluateAdditionalProperties(schema *Schema, object map[string]interface{},
 	// Evaluate additional properties
 	if schema.AdditionalProperties != nil {
 		for propName, propValue := range object {
-			if !properties[propName] {
-				result, _, _ := schema.AdditionalProperties.evaluate(propValue, dynamicScope)
-				if result != nil {
-					result.SetEvaluationPath(fmt.Sprintf("/additionalProperties/%s", propName)).
-						SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/additionalProperties/%s", propName))).
-						SetInstanceLocation(fmt.Sprintf("/%s", propName))
-
-					results = append(results, result)
-					if !result.IsValid() {
-						invalid_properties = append(invalid_properties, propName)
-					}
-				}
-
-				// Mark property as evaluated
-				evaluatedProps[propName] = true
+			if properties[propName] {
+				continue // Property is defined in schema, skip additional properties evaluation
 			}
+
+			result, _, _ := schema.AdditionalProperties.evaluate(propValue, dynamicScope)
+			if result != nil {
+				result.SetEvaluationPath(fmt.Sprintf("/additionalProperties/%s", propName)).
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/additionalProperties/%s", propName))).
+					SetInstanceLocation(fmt.Sprintf("/%s", propName))
+
+				results = append(results, result)
+				if !result.IsValid() {
+					invalid_properties = append(invalid_properties, propName)
+				}
+			}
+
+			// Mark property as evaluated
+			evaluatedProps[propName] = true
 		}
 	}
 

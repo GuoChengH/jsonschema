@@ -160,9 +160,16 @@ func (s *Schema) resolveReferences() error {
 	}
 
 	// Additional fields that can have subschemas
-	resolveSubschemaList(s.AllOf)
-	resolveSubschemaList(s.AnyOf)
-	resolveSubschemaList(s.OneOf)
+	var err error
+	if err = resolveSubschemaList(s.AllOf); err != nil {
+		return err
+	}
+	if err = resolveSubschemaList(s.AnyOf); err != nil {
+		return err
+	}
+	if err = resolveSubschemaList(s.OneOf); err != nil {
+		return err
+	}
 	if s.Not != nil {
 		if err := s.Not.resolveReferences(); err != nil {
 			return err

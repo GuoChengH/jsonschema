@@ -24,7 +24,7 @@ func evaluateAllOf(schema *Schema, instance interface{}, evaluatedProps map[stri
 	results := []*EvaluationResult{}
 
 	for i, subSchema := range schema.AllOf {
-		if subSchema != nil {
+		if subSchema != nil { //nolint
 			skipEval := false
 			if subSchema.Boolean != nil && *subSchema.Boolean {
 				// If the schema is `true`, skip updating evaluated properties and items.

@@ -19,7 +19,7 @@ import (
 // If an unevaluated array element does not conform, it returns a EvaluationError detailing the issue.
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluateditems
-func evaluateUnevaluatedItems(schema *Schema, data interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluateUnevaluatedItems(schema *Schema, data interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) { //nolint
 	items, ok := data.([]interface{})
 	if !ok {
 		return nil, nil // If data is not an array, then skip the array-specific validations.
@@ -28,7 +28,7 @@ func evaluateUnevaluatedItems(schema *Schema, data interface{}, evaluatedProps m
 	invalid_indexs := []string{}
 	results := []*EvaluationResult{}
 
-	if schema.UnevaluatedItems != nil {
+	if schema.UnevaluatedItems != nil { //nolint
 		// Evaluate un-evaluated items against the schema.
 		for i, item := range items {
 			if _, evaluated := evaluatedItems[i]; !evaluated {

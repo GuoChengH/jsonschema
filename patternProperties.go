@@ -33,7 +33,7 @@ func (s *Schema) compilePatterns() error {
 // This function ensures that properties which match the patterns validate accordingly and aids the behavior of "additionalProperties" and "unevaluatedProperties".
 //
 // Reference: https://json-schema.org/draft/2020-12/json-schema-core#name-patternproperties
-func evaluatePatternProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) {
+func evaluatePatternProperties(schema *Schema, object map[string]interface{}, evaluatedProps map[string]bool, evaluatedItems map[int]bool, dynamicScope *DynamicScope) ([]*EvaluationResult, *EvaluationError) { //nolint
 	if schema.PatternProperties == nil {
 		return nil, nil // No patternProperties defined, nothing to do.
 	}
@@ -58,23 +58,21 @@ func evaluatePatternProperties(schema *Schema, object map[string]interface{}, ev
 
 		// Check each property in the object against the compiled regex.
 		for propName, propValue := range object {
-			if regex.MatchString(propName) {
-				evaluatedProps[propName] = true
+			if !regex.MatchString(propName) {
+				continue
+			}
+			evaluatedProps[propName] = true
+			// Evaluate the property value directly using the associated schema or boolean.
+			result, _, _ := patternSchema.evaluate(propValue, dynamicScope)
+			if result != nil {
+				result.SetEvaluationPath(fmt.Sprintf("/patternProperties/%s", propName)).
+					SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/patternProperties/%s", propName))).
+					SetInstanceLocation(fmt.Sprintf("/%s", propName))
 
-				// Evaluate the property value directly using the associated schema or boolean.
-				result, _, _ := patternSchema.evaluate(propValue, dynamicScope)
-				if result != nil {
-					result.SetEvaluationPath(fmt.Sprintf("/patternProperties/%s", propName)).
-						SetSchemaLocation(schema.GetSchemaLocation(fmt.Sprintf("/patternProperties/%s", propName))).
-						SetInstanceLocation(fmt.Sprintf("/%s", propName))
+				results = append(results, result)
 
-					results = append(results, result)
-
-					if !result.IsValid() {
-						if !slices.Contains(invalid_properties, propName) {
-							invalid_properties = append(invalid_properties, propName)
-						}
-					}
+				if !result.IsValid() && !slices.Contains(invalid_properties, propName) {
+					invalid_properties = append(invalid_properties, propName)
 				}
 			}
 		}

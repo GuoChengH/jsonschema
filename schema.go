@@ -120,7 +120,7 @@ func newSchema(jsonSchema []byte) (*Schema, error) {
 
 // initializeSchema sets up the schema structure, resolves URIs, and initializes nested schemas.
 // It populates schema properties from the compiler settings and the parent schema context.
-func (s *Schema) initializeSchema(compiler *Compiler, parent *Schema) {
+func (s *Schema) initializeSchema(compiler *Compiler, parent *Schema) error {
 	s.compiler = compiler
 	s.parent = parent
 
@@ -138,11 +138,11 @@ func (s *Schema) initializeSchema(compiler *Compiler, parent *Schema) {
 		s.parent = nil
 	} else {
 		// Use the parent's base URL or the compiler's default if no ID is provided
-		if parentBaseURI != "" {
-			s.baseURI = parentBaseURI
-		} else {
-			s.baseURI = compiler.DefaultBaseURI
+		base := parentBaseURI
+		if base == "" {
+			base = compiler.DefaultBaseURI
 		}
+		s.baseURI = base
 	}
 
 	if s.baseURI == "" {
@@ -168,7 +168,8 @@ func (s *Schema) initializeSchema(compiler *Compiler, parent *Schema) {
 		compiler.SetSchema(s.uri, s)
 	}
 
-	s.resolveReferences()
+	err := s.resolveReferences()
+	return err
 }
 
 // initializeNestedSchemas initializes all nested or related schemas as defined in the structure.
@@ -316,7 +317,7 @@ func (s *Schema) getRootSchema() *Schema {
 
 // getParents returns a list of all parent schemas leading up to the current schema.
 // It traverses up the schema hierarchy collecting each parent until no further parents are found.
-func (s *Schema) getParents() []*Schema {
+func (s *Schema) getParents() []*Schema { //nolint
 	var parents []*Schema
 	for current := s; current != nil; current = current.parent {
 		parents = append(parents, current)

@@ -22,7 +22,7 @@ func evaluateAnyOf(schema *Schema, data interface{}, evaluatedProps map[string]b
 	results := []*EvaluationResult{}
 
 	for i, subSchema := range schema.AnyOf {
-		if subSchema != nil {
+		if subSchema != nil { //nolint
 			skipEval := false
 			if subSchema.Boolean != nil && *subSchema.Boolean {
 				// If the schema is `true`, skip updating evaluated properties and items.

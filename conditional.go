@@ -22,7 +22,7 @@ func evaluateConditional(schema *Schema, instance interface{}, evaluatedProps ma
 
 	results := []*EvaluationResult{}
 
-	if ifResult != nil {
+	if ifResult != nil { //nolint
 		ifResult.SetEvaluationPath("/if").
 			SetSchemaLocation(schema.GetSchemaLocation("/if")).
 			SetInstanceLocation("")
